@@ -478,3 +478,9 @@ It shows that in-memory execution accelerates the DNN switching time by ***459x 
 | No In-Memory Execution | 1801.72 | 4559.881 |
 | ***In-Memory Execution*** | ***3.919*** | ***4443.04*** |
 
+&nbsp;
+## Citation (BibTeX)
+**Fast and Scalable In-memory Deep Multitask Learning via Neural Weight Virtualization**
+```
+COMING SOON
+```
