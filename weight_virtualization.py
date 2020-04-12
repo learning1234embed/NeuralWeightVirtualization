@@ -1047,6 +1047,64 @@ class WeightVirtualization:
 		plt.hist(network_weight, density=False, bins=100)
 		plt.show()
 
+	def plot_sharing_cost_heatmap(self, vnn_list, page_size=100):
+		vnn1 = vnn_list[0]
+		print('vnn1.num_of_weight', vnn1.num_of_weight)
+		vnn1_num_of_page = vnn1.num_of_weight // page_size
+		print('vnn1_num_of_page', vnn1_num_of_page)
+
+		vnn2 = vnn_list[1]
+		print('vnn2.num_of_weight', vnn2.num_of_weight)
+		vnn2_num_of_page = vnn2.num_of_weight // page_size
+		print('vnn2_num_of_page', vnn2_num_of_page)
+
+		weight1 = self.vectorize_list(self.load_network_weight(vnn1))
+		print(weight1.shape)
+		fisher1 = self.vectorize_list(self.load_network_fisher(vnn1))
+		print(fisher1.shape)
+
+		weight2 = self.vectorize_list(self.load_network_weight(vnn2))
+		fisher2 = self.vectorize_list(self.load_network_fisher(vnn2))
+
+		sharing_cost_matrix = np.zeros((vnn2_num_of_page, vnn1_num_of_page))
+
+		for i in range(vnn1_num_of_page):
+			if i >= vnn2_num_of_page:
+				break
+
+			print(i)
+			sharing_cost_vector = np.zeros((vnn2_num_of_page))
+			w1 = weight1[i*page_size:(i+1)*page_size]
+			f1 = fisher1[i*page_size:(i+1)*page_size]
+
+			for j in range(vnn2_num_of_page):
+				w2 = weight2[j*page_size:(j+1)*page_size]
+				f2 = fisher2[j*page_size:(j+1)*page_size]
+				sharing_cost = np.sum(np.multiply(np.square(w1 - w2), (f1 + f2)))
+				sharing_cost_matrix[j,i] = sharing_cost
+
+		small = vnn1_num_of_page
+		if small > vnn2_num_of_page:
+			small = vnn2_num_of_page
+
+		sharing_cost_matrix = sharing_cost_matrix[0:small, 0:small]
+		print(sharing_cost_matrix.shape)
+
+		import seaborn as sns
+		from matplotlib.colors import LogNorm
+		from matplotlib.pyplot import figure
+		figure(num=None, figsize=(8, 4.5))
+		sns.set(font_scale=1.7)
+		ax = sns.heatmap(sharing_cost_matrix,
+			norm=LogNorm(vmin=np.min(sharing_cost_matrix), vmax=np.max(sharing_cost_matrix)),
+			cmap='Blues',
+			xticklabels=100, yticklabels=100)
+		ax.invert_yaxis()
+		plt.xlabel('xlabel', fontsize=20)
+		plt.ylabel('ylabel', fontsize=20)
+		plt.savefig("sharing_score_heatmap.pdf", bbox_inches='tight')
+		plt.show()
+
 def parse_arguments(argv):
 	parser = argparse.ArgumentParser()
 
@@ -1224,6 +1282,20 @@ def main(args):
 
 		vnn = wv.vnns[args.vnn_name]
 		wv.plot_network_weight_histogram(vnn)
+
+	elif args.mode == 'heatmap':
+		vnn_list = []
+		if args.vnn_name is None:
+			print('no vnn name')
+			return
+		else:
+			vnn_name_list = args.vnn_name.split(',')
+			assert len(vnn_name_list) == 2
+			for name in vnn_name_list:
+				vnn = wv.vnns[name]
+				assert os.path.exists(vnn.network_path)
+				vnn_list.append(vnn)
+		wv.plot_sharing_cost_heatmap(vnn_list)
 
 if __name__ == '__main__':
 	main(parse_arguments(sys.argv[1:]))
