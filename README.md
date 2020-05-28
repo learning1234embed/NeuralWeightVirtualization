@@ -1,4 +1,4 @@
-# [MobiSys 2020 Paper] Fast and Scalable In-memory Deep Multitask Learning via Neural Weight Virtualization
+# [MobiSys 2020] Fast and Scalable In-memory Deep Multitask Learning via Neural Weight Virtualization
 
 ## Introduction
 This is an open-source repository of the [MobiSys 2020](https://www.sigmobile.org/mobisys/2020/) paper titled "***Fast and Scalable In-memory Deep Multitask Learning via Neural Weight Virtualization***". It enables fast and scalable in-memory multitask deep learning on memory-constrained embedded systems by (1) packing multiple deep neural networks (DNNs) into a fixed-sized main memory whose combined memory requirement is larger than the main memory, and (2) enabling fast in-memory execution of the DNNs. 
